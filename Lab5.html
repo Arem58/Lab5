@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <div id="chat">
+            <p id="demo"></p>
+        </div>
+        <script type="application/javascript">
+            const chat = document.getElementById('chat')
+            const titulo = document.createElement('h1')
+            titulo.style = "text-align: center; font-size: 40px; color: white; font-family: Arial, Helvetica, sans-serif;"
+            titulo.append("Chat")
+            chat.append(titulo)
+            const container = document.createElement("div")
+            const messageCon = document.createElement("div")
+            document.body.style = "background: #16544b"
+            chat.style = "left: 520px; position: fixed"
+            container.append(messageCon)
+            chat.append(container)
+            messageCon.style="width: 500px; height: 600px; overflow: scroll; background: #533426; border: 3px solid black"
+            const mensajes = () =>{ 
+                messageCon.innerHTML = ' '
+                fetch('http://quetzaluno.space:3000/messages').then(
+                    resp => resp.json()
+                ).then(
+                        resp => {
+                            resp.map(value => {
+                                const messageElement = document.createElement('p')
+                                messageElement.style = "background: #8F776D; width: auto; padding: 12px 20px; border-radius: 15px; border: 1px solid black; color: white; margin: 8px 0; display: flex; flex-direction: column"
+                                messageElement.append(value.id + " ")
+                                messageElement.append(value.username + " ")
+                                if((value.message.indexOf("http")>0) || (value.message.indexOf(".jpg")>0) || (value.message.indexOf(".gif")>0) || (value.message.indexOf("png")>0) || (value.message.indexOf("www")>0)){
+                                    const imagen = document.createElement('img')
+                                    imagen.src = value.message
+                                    imagen.height = "300"
+                                    imagen.style = "align-self: center"
+                                    imagen.alt = "Sin imagen"
+                                    const espacio = document.createElement('br')
+                                    const espacio2 = document.createElement('br')
+                                    messageElement.append(espacio)
+                                    messageElement.append(espacio2)
+                                    messageElement.append(imagen)
+                                }else{
+                                    messageElement.append(value.message)
+                                }
+                                messageCon.append(messageElement)
+                            })
+                            messageCon.scrollTop = messageCon.scrollHeight
+                        })
+            }
+            mensajes()
+            const messageBox = document.createElement('textarea')
+            messageBox.style = "position: relative; width: 300px; height: 25px; background-color: #b49a8e"
+            messageBox.maxLength = "140";
+            messageBox.id = "usermsg"
+            container.append(messageBox)
+            const messageButton = document.createElement('button')
+            messageButton.style = "position: fixed; width: 200px; height: 30px; background-color: #9fbfbb"
+            messageButton.append("Send message")
+            container.append(messageButton)
+            messageButton.addEventListener('click', () => {
+                const texto = messageBox.value
+                const jsonToSend = {
+                    username: 'Renato',
+                    message: texto
+                }
+                messageBox.value = " "
+                console.log(texto)
+
+                fetch('http://quetzaluno.space:3000/messages',{
+                    method:'POST',
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(jsonToSend)
+                })
+                mensajes()
+            })
+            document.getElementById("usermsg").addEventListener("keyup", function(event) {
+                event.preventDefault()
+                if(event.keyCode === 13){
+                    const texto = messageBox.value
+                    const jsonToSend = {
+                        username: 'Renato',
+                        message: texto
+                    }
+                    console.log(texto)
+                    messageBox.value = " "
+                    fetch('http://quetzaluno.space:3000/messages',{
+                        method:'POST',
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify(jsonToSend)
+                    })
+                    mensajes()
+                }
+            })
+            setInterval(mensajes, 30000)
+        </script>
+    </body>
+</html>
